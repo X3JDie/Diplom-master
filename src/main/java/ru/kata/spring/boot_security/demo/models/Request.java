@@ -12,6 +12,10 @@ public class Request {
     private int id;
 
     @ManyToOne
+    @JoinColumn(name = "client_id")
+    private Client client;
+
+    @ManyToOne
     @JoinColumn(name = "document_id")
     private Document document;
 
@@ -32,6 +36,13 @@ public class Request {
         this.id = id;
     }
 
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
 
     public Document getDocument() {
         return document;

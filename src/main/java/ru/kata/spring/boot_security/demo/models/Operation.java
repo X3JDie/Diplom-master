@@ -19,8 +19,7 @@ public class Operation {
     private String action;
 
 
-    public Operation() {
-    }
+    public Operation() {}
 
     public Operation(String s) {
     }
