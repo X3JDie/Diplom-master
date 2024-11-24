@@ -14,14 +14,12 @@ import ru.kata.spring.boot_security.demo.models.Document;
 import ru.kata.spring.boot_security.demo.services.DocumentService;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/documents")
@@ -117,5 +115,21 @@ public class DocumentController {
             System.err.println("Error deleting document with id: " + id + " - " + e.getMessage());
             return ResponseEntity.status(500).body("Document deletion failed.");
         }
+    }
+
+    // Эндпоинт для назначения документа пользователю
+    @PostMapping("/{documentId}/assign")
+    public ResponseEntity<String> assignDocumentToUser(
+            @PathVariable Long documentId,
+            @RequestParam Long userId) {
+        Document document = documentService.assignDocumentToUser(documentId, userId);
+        return ResponseEntity.ok("Document assigned to user: " + document.getAssignedUser().getUsername());
+    }
+
+    // Эндпоинт для получения документов пользователя
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Document>> getDocumentsByUser(@PathVariable Long userId) {
+        List<Document> documents = documentService.getDocumentsByUser(userId);
+        return ResponseEntity.ok(documents);
     }
 }

@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.models.Document;
+import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.repositories.DocumentRepository;
+import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,10 +16,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class DocumentServiceImpl implements DocumentService{
+public class DocumentServiceImpl implements DocumentService {
 
     private final DocumentRepository documentRepository;
     private final Path fileStorageLocation;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     public DocumentServiceImpl(DocumentRepository documentRepository) {
@@ -64,4 +69,22 @@ public class DocumentServiceImpl implements DocumentService{
             throw new RuntimeException("Document not found with id: " + id);
         }
     }
+
+    @Override
+    public Document assignDocumentToUser(Long documentId, Long userId) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        document.setAssignedUser(user);
+        return documentRepository.save(document);
+    }
+
+    @Override
+    public List<Document> getDocumentsByUser(Long userId) {
+        return documentRepository.findByAssignedUser_Id(userId);
+    }
+
 }

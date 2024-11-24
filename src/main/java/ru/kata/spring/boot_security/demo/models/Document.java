@@ -12,8 +12,8 @@ public class Document {
     private Long id;
 
     private String title;
-    private String department; // Поле для хранения департамента
-    private Date uploadDate;   // Поле для хранения даты загрузки
+    private String department;
+    private Date uploadDate;
     private String status;
     @Column(length = 5000)
     private String filePath;
@@ -28,6 +28,10 @@ public class Document {
         this.status = status;
         this.filePath = filePath;
     }
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User assignedUser;
 
     public Long getId() {
         return id;
@@ -75,5 +79,13 @@ public class Document {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public User getAssignedUser() {
+        return assignedUser;
+    }
+
+    public void setAssignedUser(User assignedUser) {
+        this.assignedUser = assignedUser;
     }
 }
