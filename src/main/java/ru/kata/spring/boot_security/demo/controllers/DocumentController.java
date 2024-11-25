@@ -14,14 +14,12 @@ import ru.kata.spring.boot_security.demo.models.Document;
 import ru.kata.spring.boot_security.demo.services.DocumentService;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/documents")
@@ -118,4 +116,6 @@ public class DocumentController {
             return ResponseEntity.status(500).body("Document deletion failed.");
         }
     }
+
+
 }
