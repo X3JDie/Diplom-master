@@ -2,6 +2,63 @@ const userAPI = 'http://localhost:8080/api/secretary';
 const userHeader = document.getElementById("navbar-user");
 const userInfo = document.getElementById("user-info");
 
+
+
+//start
+
+
+// Функция для получения подсказок по email
+async function getEmailSuggestions(query) {
+    if (query.length < 3) {
+        document.getElementById('email-suggestions').innerHTML = '';
+        return; // Не показываем подсказки, если введено меньше 3 символов
+    }
+
+    try {
+        const response = await fetch(`http://localhost:8080/api/user/email-suggestions?query=${query}`);
+        const suggestions = await response.json();
+        showSuggestions(suggestions);
+    } catch (error) {
+        console.error('Error fetching email suggestions:', error);
+    }
+}
+
+// Функция для отображения подсказок
+function showSuggestions(suggestions) {
+    const suggestionsList = document.getElementById('email-suggestions');
+    suggestionsList.innerHTML = ''; // Очищаем список перед добавлением новых подсказок
+
+    suggestions.forEach(email => {
+        const suggestionItem = document.createElement('div');
+        suggestionItem.textContent = email;
+        suggestionItem.onclick = () => selectEmail(email);
+        suggestionsList.appendChild(suggestionItem);
+    });
+}
+
+// Функция для выбора email из подсказок
+function selectEmail(email) {
+    document.getElementById('email').value = email; // Устанавливаем выбранный email в поле ввода
+    document.getElementById('email-suggestions').innerHTML = ''; // Очищаем список подсказок
+}
+
+// Слушаем событие ввода в поле
+document.getElementById('email').addEventListener('input', function () {
+    const query = this.value;
+    getEmailSuggestions(query); // Получаем подсказки, когда пользователь что-то вводит
+});
+
+
+
+// end
+
+
+
+
+
+
+
+
 function getUser() {
     fetch(userAPI)
         .then(res => res.json())

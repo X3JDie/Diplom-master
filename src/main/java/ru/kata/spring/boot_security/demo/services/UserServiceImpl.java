@@ -10,6 +10,7 @@ import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -87,4 +88,18 @@ public class UserServiceImpl implements UserService {
     public void delete(int id) {
         userRepository.deleteById( id );
     }
+
+    @Override
+    public List<String> findEmailsByQuery(String email) {
+        List<User> users = userRepository.findByEmailStartingWith(email);
+        List<String> emailSuggestions = new ArrayList<>();
+
+        for (User user : users) {
+            emailSuggestions.add(user.getEmail());
+        }
+
+        return emailSuggestions;
+    }
+
+
 }
