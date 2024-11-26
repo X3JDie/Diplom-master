@@ -11,12 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.zeroturnaround.zip.ZipUtil;
 import ru.kata.spring.boot_security.demo.models.Document;
+import ru.kata.spring.boot_security.demo.repositories.DocumentRepository;
 import ru.kata.spring.boot_security.demo.services.DocumentService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -27,9 +29,12 @@ public class DocumentController {
 
     private final DocumentService documentService;
 
+    private final DocumentRepository documentRepository;
+
     @Autowired
-    public DocumentController(DocumentService documentService) {
+    public DocumentController(DocumentService documentService, DocumentRepository documentRepository) {
         this.documentService = documentService;
+        this.documentRepository = documentRepository;
     }
 
     @PostMapping("/upload")
@@ -117,13 +122,20 @@ public class DocumentController {
         }
     }
 
+//    @GetMapping("/mail")
+//    public ResponseEntity<List<Document>> getDocumentsByEmail(@RequestParam String email) {
+//        List<Document> documents = documentService.getDocumentsByEmail(email);
+//        if (documents.isEmpty()) {
+//            return ResponseEntity.noContent().build();  // Если документы не найдены, возвращаем 204
+//        }
+//        return ResponseEntity.ok(documents);  // Возвращаем документы с кодом 200
+//    }
+
     @GetMapping("/mail")
-    public ResponseEntity<List<Document>> getDocumentsByEmail(@RequestParam String email) {
-        List<Document> documents = documentService.getDocumentsByEmail(email);
-        if (documents.isEmpty()) {
-            return ResponseEntity.noContent().build();  // Если документы не найдены, возвращаем 204
-        }
-        return ResponseEntity.ok(documents);  // Возвращаем документы с кодом 200
+    public List<Document> getDocumentsByEmail(@RequestParam String email) {
+        return documentRepository.findByEmailContaining(email); // Это будет искать email в строках с разделителями
     }
+
+
 
 }

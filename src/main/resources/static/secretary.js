@@ -1,6 +1,107 @@
 const userAPI = 'http://localhost:8080/api/secretary';
 const userHeader = document.getElementById("navbar-user");
 const userInfo = document.getElementById("user-info");
+const emailInput = document.getElementById('emails');
+const suggestionsList = document.getElementById('email-suggestions');
+const selectedEmailsContainer = document.getElementById('selected-emails');
+
+
+let selectedEmails = [];
+
+async function getEmailSuggestions(query) {
+    if (query.length < 3) {
+        suggestionsList.innerHTML = '';
+        return; // Не показываем подсказки, если введено меньше 3 символов
+    }
+
+    try {
+        const response = await fetch(`http://localhost:8080/api/user/email-suggestions?query=${query}`);
+        const suggestions = await response.json();
+        showSuggestions(suggestions);
+    } catch (error) {
+        console.error('Error fetching email suggestions:', error);
+    }
+}
+
+// Функция для отображения подсказок
+function showSuggestions(suggestions) {
+    suggestionsList.innerHTML = ''; // Очищаем список перед добавлением новых подсказок
+
+    suggestions.forEach(email => {
+        const suggestionItem = document.createElement('div');
+        suggestionItem.className = 'dropdown-item';
+        suggestionItem.textContent = email;
+        suggestionItem.onclick = () => selectEmail(email);
+        suggestionsList.appendChild(suggestionItem);
+    });
+}
+
+// Функция для выбора email
+function selectEmail(email) {
+    if (!selectedEmails.includes(email)) {
+        selectedEmails.push(email);
+
+        const emailTag = document.createElement('div');
+        emailTag.className = 'selected-email';
+        emailTag.innerHTML = `${email}<span>&times;</span>`;
+        emailTag.querySelector('span').onclick = () => removeEmail(email, emailTag);
+
+        selectedEmailsContainer.appendChild(emailTag);
+    }
+
+    emailInput.value = ''; // Очищаем поле ввода
+    suggestionsList.innerHTML = ''; // Очищаем подсказки
+}
+
+// Функция для удаления email из списка
+function removeEmail(email, emailTag) {
+    selectedEmails = selectedEmails.filter(e => e !== email);
+    selectedEmailsContainer.removeChild(emailTag);
+}
+
+// Слушаем событие ввода в поле
+emailInput.addEventListener('input', function () {
+    const query = this.value;
+    getEmailSuggestions(query);
+});
+
+// Для отправки выбранных email в форму
+document.getElementById('upload-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const formData = new FormData();
+    const files = document.getElementById('file').files;
+
+    // Добавляем файлы в FormData
+    for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+    }
+
+    formData.append('title', document.getElementById('title').value);
+    formData.append('emails', selectedEmails.join(',')); // Объединяем выбранные email через запятую
+
+    fetch('http://localhost:8080/api/documents/upload', {
+        method: 'POST',
+        body: formData,
+    })
+        .then(response => {
+            if (response.ok) {
+                alert('Documents uploaded successfully.');
+
+                // Очистка после успешной отправки
+                selectedEmails = []; // Очищаем массив email
+                selectedEmailsContainer.innerHTML = ''; // Очищаем визуально
+                emailInput.value = ''; // Сбрасываем поле ввода
+                document.getElementById('title').value = ''; // Сбрасываем заголовок
+                document.getElementById('file').value = ''; // Сбрасываем файлы
+            } else {
+                alert('Error uploading documents.');
+            }
+        })
+        .catch(error => {
+            console.error('Error uploading documents:', error);
+        });
+});
 
 function getUser() {
     fetch(userAPI)
@@ -48,7 +149,6 @@ function getUser() {
             loadUsers(); // Загружаем список пользователей
             loadDocuments(); // Загружаем документы
         });
-
 
 
         // Функция для загрузки списка документов
@@ -112,7 +212,6 @@ function getUser() {
         });
 
 
-
 // Download document
         $(document).on('click', '.download-btn', function () {
             const docId = $(this).data('id');
@@ -138,7 +237,6 @@ function getUser() {
                 })
                 .catch(error => console.error('Error downloading document:', error));
         });
-
 
 
         // Событие для кнопки удаления документа
@@ -208,9 +306,7 @@ function getUser() {
     });
 
 
-
 // end
-
 
 
 }

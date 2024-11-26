@@ -15,4 +15,7 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
     Optional<Document> findById(Long id);
 
     List<Document> findByEmail(String email);
+
+
+    List<Document> findByEmailContaining(String email);
 }
