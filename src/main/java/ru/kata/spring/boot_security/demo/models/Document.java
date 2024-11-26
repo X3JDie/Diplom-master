@@ -14,6 +14,7 @@ public class Document {
     private String title;
     private String department; // Поле для хранения департамента
     private Date uploadDate;   // Поле для хранения даты загрузки
+    private String email;
     private String status;
     @Column(length = 5000)
     private String filePath;
@@ -75,5 +76,13 @@ public class Document {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

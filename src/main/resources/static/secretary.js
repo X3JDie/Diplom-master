@@ -2,63 +2,6 @@ const userAPI = 'http://localhost:8080/api/secretary';
 const userHeader = document.getElementById("navbar-user");
 const userInfo = document.getElementById("user-info");
 
-
-
-//start
-
-
-// Функция для получения подсказок по email
-async function getEmailSuggestions(query) {
-    if (query.length < 3) {
-        document.getElementById('email-suggestions').innerHTML = '';
-        return; // Не показываем подсказки, если введено меньше 3 символов
-    }
-
-    try {
-        const response = await fetch(`http://localhost:8080/api/user/email-suggestions?query=${query}`);
-        const suggestions = await response.json();
-        showSuggestions(suggestions);
-    } catch (error) {
-        console.error('Error fetching email suggestions:', error);
-    }
-}
-
-// Функция для отображения подсказок
-function showSuggestions(suggestions) {
-    const suggestionsList = document.getElementById('email-suggestions');
-    suggestionsList.innerHTML = ''; // Очищаем список перед добавлением новых подсказок
-
-    suggestions.forEach(email => {
-        const suggestionItem = document.createElement('div');
-        suggestionItem.textContent = email;
-        suggestionItem.onclick = () => selectEmail(email);
-        suggestionsList.appendChild(suggestionItem);
-    });
-}
-
-// Функция для выбора email из подсказок
-function selectEmail(email) {
-    document.getElementById('email').value = email; // Устанавливаем выбранный email в поле ввода
-    document.getElementById('email-suggestions').innerHTML = ''; // Очищаем список подсказок
-}
-
-// Слушаем событие ввода в поле
-document.getElementById('email').addEventListener('input', function () {
-    const query = this.value;
-    getEmailSuggestions(query); // Получаем подсказки, когда пользователь что-то вводит
-});
-
-
-
-// end
-
-
-
-
-
-
-
-
 function getUser() {
     fetch(userAPI)
         .then(res => res.json())
@@ -139,25 +82,35 @@ function getUser() {
             event.preventDefault();
 
             const formData = new FormData();
-            formData.append('file', $('#files')[0].files[0]); // файл
-            formData.append('title', $('#title').val());      // заголовок
-            formData.append('department', $('#department').val()); // департамент
-            formData.append('recipientId', $('#recipient').val()); // ID получателя
+            const files = $('#files')[0].files;  // Получаем все выбранные файлы
 
-            fetch(documentAPI, {
+            // Добавляем каждый файл в FormData
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);  // 'files' будет массивом на сервере
+            }
+
+            formData.append('title', $('#title').val());  // Заголовок
+            formData.append('email', $('#email').val());  // Почта
+            formData.append('recipientId', $('#recipient').val());  // ID получателя
+
+            // Отправка формы через fetch
+            fetch(documentAPI + '/upload', {
                 method: 'POST',
                 body: formData
             })
                 .then(response => {
                     if (response.ok) {
-                        alert('Document uploaded successfully.');
-                        loadDocuments(); // Перезагружаем список документов
+                        alert('Documents uploaded successfully.');
+                        loadDocuments();  // Перезагружаем список документов
                     } else {
-                        alert('Error uploading document.');
+                        alert('Error uploading documents.');
                     }
                 })
-                .catch(error => console.error('Error uploading document:', error));
+                .catch(error => {
+                    console.error('Error uploading documents:', error);
+                });
         });
+
 
 
 // Download document
@@ -208,6 +161,58 @@ function getUser() {
         // Загрузка документов при загрузке страницы
         loadDocuments();
     });
+
+
+    //start
+
+
+// Функция для получения подсказок по email
+    async function getEmailSuggestions(query) {
+        if (query.length < 3) {
+            document.getElementById('email-suggestions').innerHTML = '';
+            return; // Не показываем подсказки, если введено меньше 3 символов
+        }
+
+        try {
+            const response = await fetch(`http://localhost:8080/api/user/email-suggestions?query=${query}`);
+            const suggestions = await response.json();
+            showSuggestions(suggestions);
+        } catch (error) {
+            console.error('Error fetching email suggestions:', error);
+        }
+    }
+
+// Функция для отображения подсказок
+    function showSuggestions(suggestions) {
+        const suggestionsList = document.getElementById('email-suggestions');
+        suggestionsList.innerHTML = ''; // Очищаем список перед добавлением новых подсказок
+
+        suggestions.forEach(email => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.textContent = email;
+            suggestionItem.onclick = () => selectEmail(email);
+            suggestionsList.appendChild(suggestionItem);
+        });
+    }
+
+// Функция для выбора email из подсказок
+    function selectEmail(email) {
+        document.getElementById('email').value = email; // Устанавливаем выбранный email в поле ввода
+        document.getElementById('email-suggestions').innerHTML = ''; // Очищаем список подсказок
+    }
+
+// Слушаем событие ввода в поле
+    document.getElementById('email').addEventListener('input', function () {
+        const query = this.value;
+        getEmailSuggestions(query); // Получаем подсказки, когда пользователь что-то вводит
+    });
+
+
+
+// end
+
+
+
 }
 
 getUser();

@@ -65,6 +65,10 @@ public class DocumentServiceImpl implements DocumentService{
         }
     }
 
+    @Override
+    public List<Document> getDocumentsByEmail(String email) {
+        return documentRepository.findByEmail(email);
+    }
 
 
 }

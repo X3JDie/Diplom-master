@@ -35,7 +35,7 @@ public class DocumentController {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadDocuments(@RequestParam("files") MultipartFile[] files,
                                                   @RequestParam("title") String title,
-                                                  @RequestParam("department") String department) {
+                                                  @RequestParam("email") String email) {
         try {
             StringBuilder fileNames = new StringBuilder();
 
@@ -49,7 +49,7 @@ public class DocumentController {
 
             Document document = new Document();
             document.setTitle(title);
-            document.setDepartment(department);
+            document.setEmail(email);
             document.setFilePath(fileNames.toString());
             document.setStatus("Draft");
             document.setUploadDate(new Date());
@@ -117,5 +117,13 @@ public class DocumentController {
         }
     }
 
+    @GetMapping("/mail")
+    public ResponseEntity<List<Document>> getDocumentsByEmail(@RequestParam String email) {
+        List<Document> documents = documentService.getDocumentsByEmail(email);
+        if (documents.isEmpty()) {
+            return ResponseEntity.noContent().build();  // Если документы не найдены, возвращаем 204
+        }
+        return ResponseEntity.ok(documents);  // Возвращаем документы с кодом 200
+    }
 
 }

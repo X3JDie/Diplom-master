@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.kata.spring.boot_security.demo.models.User;
+import ru.kata.spring.boot_security.demo.services.DocumentService;
 import ru.kata.spring.boot_security.demo.services.UserService;
+import ru.kata.spring.boot_security.demo.models.Document;
 
 import java.security.Principal;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.List;
 public class UserRestController {
 
     private final UserService userService;
+    private DocumentService documentService;
 
     @Autowired
     public UserRestController(UserService userService) {
@@ -42,6 +45,8 @@ public class UserRestController {
         // Если нет предложений, можно вернуть пустой список
         return ResponseEntity.ok(suggestions);
     }
+
+
 
 
 }
