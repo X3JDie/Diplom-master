@@ -5,29 +5,54 @@ const userInfo = document.getElementById("user-info");
 
 let currentUserEmail = '';  // Для хранения email текущего пользователя
 
+// Функция для загрузки документов пользователя
 function loadUserDocuments() {
+    // Логируем URL для диагностики
+    console.log(`Fetching documents for user: ${currentUserEmail}`);
+
     fetch(`${documentAPI}?email=${currentUserEmail}`)
-        .then(res => res.json())
+        .then(res => res.json()) // Получаем JSON ответ
         .then(documents => {
             let documentRows = '';
+            console.log(documents);  // Логируем все документы
+
+            // Для каждого документа создаем строку таблицы
             documents.forEach(doc => {
+                console.log(`Document ID: ${doc.id}, Email: ${doc.email}`); // Логируем каждый документ
+
+                let emailList = '';
+                if (doc.email) {
+                    // Если email несколько, разделяем их запятой
+                    if (doc.email.includes(',')) {
+                        emailList = doc.email.split(',').map(email => `<span class="badge bg-primary me-1">${email.trim()}</span>`).join(' ');
+                    } else if (doc.email !== 'undefined') { // Если email один и он не 'undefined'
+                        emailList = `<span class="badge bg-primary">${doc.email.trim()}</span>`;
+                    }
+                } else {
+                    emailList = '<span class="text-muted">No email</span>'; // Если email отсутствует
+                }
+
                 documentRows += `
                     <tr>
                         <td>${doc.id}</td>
                         <td>${doc.title}</td>
-                        <td>${doc.description}</td>
-                        <td>${doc.status}</td>
+                        <td>${doc.department || 'No department'}</td>
+                        <td>${new Date(doc.uploadDate).toLocaleString()}</td> <!-- Преобразуем дату -->
+                        <td>${emailList}</td> <!-- Здесь выводим email -->
                         <td>
                             <button class="btn btn-sm btn-primary download-btn" data-id="${doc.id}">Download</button>
                             <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Delete</button>
                         </td>
                     </tr>`;
             });
-            $('#document-info').html(documentRows);  // Заполняем таблицу с документами
+
+            // Вставляем строки в таблицу
+            $('#document-info').html(documentRows);
         })
-        .catch(error => console.error("Failed to load documents:", error));
+        .catch(error => console.error("Failed to load documents:", error)); // Логируем ошибки
 }
 
+// Функция для загрузки данных текущего пользователя
 function getUser() {
     fetch(userAPI)
         .then(res => res.json())
@@ -39,14 +64,15 @@ function getUser() {
             userHeader.innerHTML = `<span class="fw-bolder">${principal.email}</span>
             <span> with roles: </span>
             <span>${roles}</span>`;
+
+            // Отображаем информацию о пользователе
             userInfo.innerHTML = `
                 <th scope="row">${principal.id}</th>
                 <td>${principal.name}</td>
                 <td>${principal.surname}</td>
                 <td>${principal.age}</td>
                 <th>${principal.email}</th>
-                <td>
-                    <span>${roles}</span></td>`;
+                <td><span>${roles}</span></td>`;
 
             currentUserEmail = principal.email;  // Сохраняем email текущего пользователя
             loadUserDocuments();  // Загружаем документы для этого пользователя
@@ -54,6 +80,7 @@ function getUser() {
         .catch(error => console.error('Error fetching user data:', error));
 }
 
+// События загрузки и удаления документов
 $(document).ready(function () {
     // Upload document
     $('#upload-form').on('submit', function (event) {
@@ -103,8 +130,6 @@ $(document).ready(function () {
             .catch(error => console.error('Error deleting document:', error));
     });
 
-    // Загрузка документов при загрузке страницы
-    loadUserDocuments();
+    // Загружаем данные при загрузке страницы
+    getUser();
 });
-
-getUser();
