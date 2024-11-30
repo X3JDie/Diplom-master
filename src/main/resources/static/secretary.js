@@ -62,7 +62,7 @@ function getUser() {
                         <tr>
                             <td>${doc.id}</td>
                             <td>${doc.title}</td>
-                            <td>${doc.department}</td>
+                            <td>${doc.email}</td>
                             <td>${new Date(doc.uploadDate).toLocaleString()}</td>
                             <td>${doc.status}</td>
                             <td>
