@@ -1,4 +1,5 @@
 const userAPI = 'http://localhost:8080/api/secretary';
+const documentAPI = 'http://localhost:8080/api/documents';
 const userHeader = document.getElementById("navbar-user");
 const userInfo = document.getElementById("user-info");
 const emailInput = document.getElementById('email');
@@ -51,55 +52,106 @@ function getUser() {
 
         $(document).ready(function () {
             loadUsers(); // Загружаем список пользователей
-            loadDocuments(); // Загружаем документы
+
         });
 
         // Функция для загрузки списка документов
-        function loadDocuments() {
-            fetch(documentAPI)
+        // function loadDocuments() {
+        //     const userEmail = document.getElementById('email').value; // Получаем email текущего пользователя
+        //     fetch(`/api/documents/mail?email=${userEmail}`)
+        //         .then(res => res.json())
+        //         .then(documents => {
+        //             let sentDocuments = '';
+        //             let receivedDocuments = '';
+        //
+        //             documents.forEach(doc => {
+        //                 if (doc.emailSender === userEmail) {
+        //                     sentDocuments += `
+        //                 <tr>
+        //                     <td>${doc.id}</td>
+        //                     <td>${doc.title}</td>
+        //                     <td>${doc.emailSender}</td>
+        //                     <td>${new Date(doc.uploadDate).toLocaleString()}</td>
+        //                     <td>${doc.status}</td>
+        //                     <td>
+        //                         <button class="btn btn-sm btn-primary download-btn" data-id="${doc.id}">Download</button>
+        //                         <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Delete</button>
+        //                     </td>
+        //                 </tr>`;
+        //                 } else if (doc.emailRecipient === userEmail) {
+        //                     receivedDocuments += `
+        //                 <tr>
+        //                     <td>${doc.id}</td>
+        //                     <td>${doc.title}</td>
+        //                     <td>${doc.emailSender}</td>
+        //                     <td>${new Date(doc.uploadDate).toLocaleString()}</td>
+        //                     <td>${doc.status}</td>
+        //                     <td>
+        //                         <button class="btn btn-sm btn-primary download-btn" data-id="${doc.id}">Download</button>
+        //                         <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Delete</button>
+        //                     </td>
+        //                 </tr>`;
+        //                 }
+        //             });
+        //
+        //             document.getElementById('sent-documents').innerHTML = sentDocuments;
+        //             document.getElementById('received-documents').innerHTML = receivedDocuments;
+        //         })
+        //         .catch(error => console.error("Error loading documents:", error));
+        // }
+
+        function loadDocumentsIncoming() {
+            const userEmail = 'secretary@example.com';  // Замените на логин пользователя, который залогинен
+            fetch(`/api/documents/incoming?email=${userEmail}`)
                 .then(res => res.json())
                 .then(documents => {
-                    const userEmail = document.getElementById('email').value;  // Почта пользователя в системе
-                    let sentDocuments = '';
-                    let receivedDocuments = '';
-
+                    let documentRows = '';
                     documents.forEach(doc => {
-                        // Проверяем, является ли документ отправленным или полученным
-                        if (doc.email === userEmail) {  // Если почта документа совпадает с почтой пользователя, это отправленный документ
-                            sentDocuments += `
-                        <tr>
-                            <td>${doc.id}</td>
-                            <td>${doc.title}</td>
-                            <td>${doc.email}</td>
-                            <td>${new Date(doc.uploadDate).toLocaleString()}</td>
-                            <td>${doc.status}</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary download-btn" data-id="${doc.id}">Download</button>
-                                <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Delete</button>
-                            </td>
-                        </tr>`;
-                        } else if (doc.recipientEmail === userEmail) {  // Если это полученный документ
-                            receivedDocuments += `
-                        <tr>
-                            <td>${doc.id}</td>
-                            <td>${doc.title}</td>
-                            <td>${doc.email}</td>
-                            <td>${new Date(doc.uploadDate).toLocaleString()}</td>
-                            <td>${doc.status}</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary download-btn" data-id="${doc.id}">Download</button>
-                                <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Delete</button>
-                            </td>
-                        </tr>`;
-                        }
+                        documentRows += `
+                    <tr>
+                        <td>${doc.id}</td>
+                        <td>${doc.title}</td>
+                        <td>${doc.status}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary download-btn" data-id="${doc.id}">Download</button>
+                            <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Delete</button>
+                        </td>
+                    </tr>`;
                     });
-
-                    // Вставляем документы в соответствующие таблицы
-                    $('#document-sent-1').html(sentDocuments); // Отправленные документы
-                    $('#document-incoming-1').html(receivedDocuments); // Полученные документы
+                    $('#document-incoming-1').html(documentRows);
                 })
                 .catch(error => console.error("Failed to load documents:", error));
         }
+
+
+
+        function loadDocumentsSender() {
+            const userEmail = 'secretary@example.com';  // Замените на логин пользователя, который залогинен
+            fetch(`/api/documents/sent?emailSender=${userEmail}`)
+                .then(res => res.json())
+                .then(documents => {
+                    let documentRows = '';
+                    documents.forEach(doc => {
+                        documentRows += `
+                    <tr>
+                        <td>${doc.id}</td>
+                        <td>${doc.title}</td>
+                        <td>${doc.status}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary download-btn" data-id="${doc.id}">Download</button>
+                            <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Delete</button>
+                        </td>
+                    </tr>`;
+                    });
+                    $('#document-sent-1').html(documentRows);
+                })
+                .catch(error => console.error("Failed to load documents:", error));
+        }
+
+        $(document).ready(function () {
+            loadDocumentsIncoming(); // Загружаем список полученных документов
+            loadDocumentsSender();   // Загружаем список отправленных документов
+        });
 
 
 // Upload document
@@ -143,6 +195,8 @@ function getUser() {
                 .catch(error => {
                     console.error('Error fetching user data:', error);
                 });
+            loadDocumentsIncoming();
+            loadDocumentsSender();
         });
 
 
@@ -191,7 +245,8 @@ function getUser() {
         });
 
         // Загрузка документов при загрузке страницы
-        loadDocuments();
+        loadDocumentsIncoming();
+        loadDocumentsSender();
     });
 
 

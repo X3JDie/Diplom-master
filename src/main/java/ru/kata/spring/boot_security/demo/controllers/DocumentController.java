@@ -80,6 +80,8 @@ public class DocumentController {
         }
     }
 
+
+
     @GetMapping("/{id}/download")
     public ResponseEntity<Resource> downloadDocument(@PathVariable Long id) {
         Optional<Document> documentOptional = documentService.findById(id);
@@ -119,9 +121,42 @@ public class DocumentController {
         }
     }
 
+//    @GetMapping("/mail")
+//    public ResponseEntity<List<Document>> getDocumentsByEmail(@RequestParam String email) {
+//        List<Document> documents = documentService.getDocumentsByEmail(email);
+//        if (documents.isEmpty()) {
+//            return ResponseEntity.noContent().build();  // Если документы не найдены, возвращаем 204
+//        }
+//        return ResponseEntity.ok(documents);  // Возвращаем документы с кодом 200
+//    }
+
     @GetMapping("/mail")
+    public ResponseEntity<List<Document>> getDocumentsByEmail(@RequestParam String email, String emailSender) {
+        System.out.println("Looking for documents for email: " + email);  // Выводим email для отладки
+        List<Document> documents = documentService.getDocumentsByEmail(email,emailSender);
+        if (documents.isEmpty()) {
+            return ResponseEntity.noContent().build();  // Если документов не найдено, возвращаем 204
+        }
+        return ResponseEntity.ok(documents);  // Возвращаем документы с кодом 200
+    }
+
+    @GetMapping("/incoming")
     public ResponseEntity<List<Document>> getDocumentsByEmail(@RequestParam String email) {
-        List<Document> documents = documentService.getDocumentsByEmail(email);
+        // Фильтрация по получателю (email)
+        List<Document> documents = documentService.getDocumentsByEmail(email, null);
+
+        if (documents.isEmpty()) {
+            return ResponseEntity.noContent().build();  // Если документы не найдены, возвращаем 204
+        }
+
+        return ResponseEntity.ok(documents);  // Возвращаем документы с кодом 200
+    }
+
+
+
+    @GetMapping("/sent")
+    public ResponseEntity<List<Document>> getDocumentsBySenderEmail(@RequestParam String emailSender) {
+        List<Document> documents = documentService.getDocumentsByEmail(null, emailSender); // Фильтрация по отправителю
         if (documents.isEmpty()) {
             return ResponseEntity.noContent().build();  // Если документы не найдены, возвращаем 204
         }

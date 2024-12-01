@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class DocumentServiceImpl implements DocumentService{
+public class DocumentServiceImpl implements DocumentService {
 
     private final DocumentRepository documentRepository;
     private final Path fileStorageLocation;
@@ -65,9 +65,40 @@ public class DocumentServiceImpl implements DocumentService{
         }
     }
 
+//    @Override
+//    public List<Document> getDocumentsByEmail(String email) {
+//        return documentRepository.findByEmail(email);
+//    }
+
+//    @Override
+//    public List<Document> getDocumentsByEmail(String email, String emailSender) {
+//
+//        return documentRepository.findByEmailSenderOrEmailSender(email, emailSender);
+//    }
+
     @Override
-    public List<Document> getDocumentsByEmail(String email) {
+    public List<Document> getDocumentsByEmail(String email, String emailSender) {
+        // Фильтрация документов по email (получатель) и/или emailSender (отправитель)
+        if (emailSender != null) {
+            return documentRepository.findByEmailSender(emailSender);
+        }
         return documentRepository.findByEmail(email);
+    }
+
+    @Override
+    public List<Document> findByEmailSender(String emailSender) {
+        return documentRepository.findByEmailSender(emailSender);
+    }
+
+
+    @Override
+    public List<Document> getDocumentsByEmailRecipient(String email) {
+        return documentRepository.findByEmail(email);
+    }
+
+    @Override
+    public List<Document> getDocumentsByEmailSender(String emailSender) {
+        return documentRepository.findByEmailSender(emailSender);
     }
 
 

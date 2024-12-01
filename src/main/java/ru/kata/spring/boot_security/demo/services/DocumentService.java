@@ -15,6 +15,14 @@ public interface DocumentService {
 
     void delete(Long id);
 
+    //    List<Document> getDocumentsByEmail(String email);
+    List<Document> getDocumentsByEmail(String email, String emailSend);
 
-    List<Document> getDocumentsByEmail(String email);
+    List<Document> findByEmailSender(String emailSender);
+
+    List<Document> getDocumentsByEmailRecipient(String email);
+
+    List<Document> getDocumentsByEmailSender(String email);
+
+
 }
