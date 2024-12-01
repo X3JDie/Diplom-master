@@ -12,20 +12,22 @@ public class Document {
     private Long id;
 
     private String title;
-    private String department; // Поле для хранения департамента
     private Date uploadDate;   // Поле для хранения даты загрузки
     private String email;
+
+    private String emailSender;
     private String status;
     @Column(length = 5000)
     private String filePath;
 
+
     public Document() {
     }
 
-    public Document(String title, String department, String resolution, Date uploadDate, String status, String filePath) {
+    public Document(String title, String department, String resolution, Date uploadDate, String emailSender, String status, String filePath) {
         this.title = title;
-        this.department = department;
         this.uploadDate = uploadDate;
+        this.emailSender = emailSender;
         this.status = status;
         this.filePath = filePath;
     }
@@ -44,14 +46,6 @@ public class Document {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
     }
 
     public Date getUploadDate() {
@@ -84,5 +78,13 @@ public class Document {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getEmailSender() {
+        return emailSender;
+    }
+
+    public void setEmailSender(String emailSender) {
+        this.emailSender = emailSender;
     }
 }

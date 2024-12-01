@@ -1,6 +1,11 @@
 const userAPI = 'http://localhost:8080/api/secretary';
 const userHeader = document.getElementById("navbar-user");
 const userInfo = document.getElementById("user-info");
+const emailInput = document.getElementById('email');
+const suggestionsList = document.getElementById('email-suggestions');
+const selectedEmailsContainer = document.getElementById('selected-emails');
+let selectedEmails = [];
+
 
 function getUser() {
     fetch(userAPI)
@@ -43,22 +48,25 @@ function getUser() {
                 .catch(error => console.error("Failed to load users:", error));
         }
 
-// Добавьте вызов loadUsers при загрузке страницы
+
         $(document).ready(function () {
             loadUsers(); // Загружаем список пользователей
             loadDocuments(); // Загружаем документы
         });
-
-
 
         // Функция для загрузки списка документов
         function loadDocuments() {
             fetch(documentAPI)
                 .then(res => res.json())
                 .then(documents => {
-                    let documentRows = '';
+                    const userEmail = document.getElementById('email').value;  // Почта пользователя в системе
+                    let sentDocuments = '';
+                    let receivedDocuments = '';
+
                     documents.forEach(doc => {
-                        documentRows += `
+                        // Проверяем, является ли документ отправленным или полученным
+                        if (doc.email === userEmail) {  // Если почта документа совпадает с почтой пользователя, это отправленный документ
+                            sentDocuments += `
                         <tr>
                             <td>${doc.id}</td>
                             <td>${doc.title}</td>
@@ -70,8 +78,25 @@ function getUser() {
                                 <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Delete</button>
                             </td>
                         </tr>`;
+                        } else if (doc.recipientEmail === userEmail) {  // Если это полученный документ
+                            receivedDocuments += `
+                        <tr>
+                            <td>${doc.id}</td>
+                            <td>${doc.title}</td>
+                            <td>${doc.email}</td>
+                            <td>${new Date(doc.uploadDate).toLocaleString()}</td>
+                            <td>${doc.status}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary download-btn" data-id="${doc.id}">Download</button>
+                                <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Delete</button>
+                            </td>
+                        </tr>`;
+                        }
                     });
-                    $('#document-info').html(documentRows);
+
+                    // Вставляем документы в соответствующие таблицы
+                    $('#document-sent-1').html(sentDocuments); // Отправленные документы
+                    $('#document-incoming-1').html(receivedDocuments); // Полученные документы
                 })
                 .catch(error => console.error("Failed to load documents:", error));
         }
@@ -91,6 +116,7 @@ function getUser() {
 
             formData.append('title', $('#title').val());  // Заголовок
             formData.append('email', $('#email').val());  // Почта
+            formData.append('emailSend', document.getElementById('email').value);  // Используем email текущего пользователя
             formData.append('recipientId', $('#recipient').val());  // ID получателя
 
             // Отправка формы через fetch
@@ -107,10 +133,9 @@ function getUser() {
                     }
                 })
                 .catch(error => {
-                    console.error('Error uploading documents:', error);
+                    console.error('Error uploading documents: YEap 2', error);
                 });
         });
-
 
 
 // Download document
@@ -140,7 +165,6 @@ function getUser() {
         });
 
 
-
         // Событие для кнопки удаления документа
         $(document).on('click', '.delete-btn', function () {
             const docId = $(this).data('id');
@@ -166,10 +190,10 @@ function getUser() {
     //start
 
 
-// Функция для получения подсказок по email
+    // Функция для получения подсказок по email
     async function getEmailSuggestions(query) {
         if (query.length < 3) {
-            document.getElementById('email-suggestions').innerHTML = '';
+            suggestionsList.innerHTML = '';
             return; // Не показываем подсказки, если введено меньше 3 символов
         }
 
@@ -182,37 +206,99 @@ function getUser() {
         }
     }
 
-// Функция для отображения подсказок
+    // Функция для отображения подсказок
     function showSuggestions(suggestions) {
-        const suggestionsList = document.getElementById('email-suggestions');
         suggestionsList.innerHTML = ''; // Очищаем список перед добавлением новых подсказок
 
         suggestions.forEach(email => {
             const suggestionItem = document.createElement('div');
             suggestionItem.textContent = email;
-            suggestionItem.onclick = () => selectEmail(email);
+            suggestionItem.classList.add('suggestion-item', 'p-2', 'border', 'mb-1', 'cursor-pointer');
+            suggestionItem.onclick = () => addEmail(email);
             suggestionsList.appendChild(suggestionItem);
         });
     }
 
-// Функция для выбора email из подсказок
-    function selectEmail(email) {
-        document.getElementById('email').value = email; // Устанавливаем выбранный email в поле ввода
-        document.getElementById('email-suggestions').innerHTML = ''; // Очищаем список подсказок
+    // Функция для добавления email в список выбранных
+    function addEmail(email) {
+        if (!selectedEmails.includes(email)) {
+            selectedEmails.push(email);
+            updateSelectedEmails();
+        }
+        emailInput.value = ''; // Очищаем поле ввода
+        suggestionsList.innerHTML = ''; // Очищаем подсказки
     }
 
-// Слушаем событие ввода в поле
-    document.getElementById('email').addEventListener('input', function () {
+    // Функция для отображения выбранных email
+    function updateSelectedEmails() {
+        selectedEmailsContainer.innerHTML = '';
+        selectedEmails.forEach(email => {
+            const emailBadge = document.createElement('span');
+            emailBadge.classList.add('badge', 'bg-secondary', 'me-2', 'position-relative');
+            emailBadge.textContent = email;
+
+            const removeButton = document.createElement('span');
+            removeButton.classList.add('position-absolute', 'top-0', 'end-0', 'text-danger', 'cursor-pointer');
+            removeButton.innerHTML = '&times;';
+            removeButton.onclick = () => removeEmail(email);
+
+            emailBadge.appendChild(removeButton);
+            selectedEmailsContainer.appendChild(emailBadge);
+        });
+    }
+
+    // Функция для удаления email из списка выбранных
+    function removeEmail(email) {
+        selectedEmails = selectedEmails.filter(e => e !== email);
+        updateSelectedEmails();
+    }
+
+    // Слушаем событие ввода в поле
+    emailInput.addEventListener('input', function () {
         const query = this.value;
         getEmailSuggestions(query); // Получаем подсказки, когда пользователь что-то вводит
     });
 
+    // Обработка отправки формы
+    document.getElementById('upload-form').addEventListener('submit', function (event) {
+        event.preventDefault();
 
+        const formData = new FormData();
+        const files = document.getElementById('files').files;
 
-// end
+        // Добавляем каждый файл в FormData
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
 
+        formData.append('title', document.getElementById('title').value);
+        formData.append('emails', JSON.stringify(selectedEmails)); // Передаем выбранные email как JSON
+
+        fetch('http://localhost:8080/api/documents/upload', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('Documents uploaded successfully.');
+                    location.reload();
+                } else {
+                    return response.json(); // Получаем ответ от сервера, если он есть
+                }
+            })
+            .then(data => {
+                if (data && data.message) {
+                    alert('Error uploading documents: ' + data.message); // Сообщение с ошибкой от сервера
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading documents:', error);
+                alert('An error occurred while uploading the documents. Please try again later.');
+            });
+    });
 
 
 }
 
 getUser();
+

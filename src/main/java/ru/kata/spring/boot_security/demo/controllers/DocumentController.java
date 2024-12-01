@@ -35,7 +35,8 @@ public class DocumentController {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadDocuments(@RequestParam("files") MultipartFile[] files,
                                                   @RequestParam("title") String title,
-                                                  @RequestParam("email") String email) {
+                                                  @RequestParam("email") String email,
+                                                  @RequestParam("emailSend") String emailSend) {
         try {
             StringBuilder fileNames = new StringBuilder();
 
@@ -50,6 +51,7 @@ public class DocumentController {
             Document document = new Document();
             document.setTitle(title);
             document.setEmail(email);
+            document.setEmailSender(emailSend);
             document.setFilePath(fileNames.toString());
             document.setStatus("Draft");
             document.setUploadDate(new Date());
