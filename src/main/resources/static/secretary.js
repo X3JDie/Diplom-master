@@ -115,25 +115,33 @@ function getUser() {
             }
 
             formData.append('title', $('#title').val());  // Заголовок
-            formData.append('email', $('#email').val());  // Почта
-            formData.append('emailSend', document.getElementById('email').value);  // Используем email текущего пользователя
-            formData.append('recipientId', $('#recipient').val());  // ID получателя
+            formData.append('email', $('#email').val());  // Почта получателя
 
-            // Отправка формы через fetch
-            fetch(documentAPI + '/upload', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => {
-                    if (response.ok) {
-                        alert('Documents uploaded successfully.');
-                        loadDocuments();  // Перезагружаем список документов
-                    } else {
-                        alert('Error uploading documents.');
-                    }
+            // Получаем email текущего пользователя через API
+            fetch(userAPI)
+                .then(res => res.json())
+                .then(principal => {
+                    formData.append('emailSend', principal.email);  // Используем email текущего пользователя
+
+                    // Отправка формы через fetch
+                    fetch(documentAPI + '/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                alert('Documents uploaded successfully.');
+                                loadDocuments();  // Перезагружаем список документов
+                            } else {
+                                alert('Error uploading documents.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error uploading documents:', error);
+                        });
                 })
                 .catch(error => {
-                    console.error('Error uploading documents: YEap 2', error);
+                    console.error('Error fetching user data:', error);
                 });
         });
 
