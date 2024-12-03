@@ -80,10 +80,47 @@ $(document).ready(function () {
             .catch(error => console.error('Error uploading document:', error));
     });
 
+
+    $('#upload-form').on('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData();
+        const files = $('#files')[0].files;  // Получаем все выбранные файлы
+
+        // Добавляем каждый файл в FormData
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);  // 'files' будет массивом на сервере
+        }
+
+        formData.append('title', $('#title').val());  // Заголовок
+        formData.append('email', $('#email').val());  // Почта
+        formData.append('emailSend', document.getElementById('email').value);  // Используем email текущего пользователя
+        formData.append('recipientId', $('#recipient').val());  // ID получателя
+
+        // Отправка формы через fetch
+        fetch(documentAPI + '/upload', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('Documents uploaded successfully.');
+                    loadDocuments();  // Перезагружаем список документов
+                } else {
+                    alert('Error uploading documents.');
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading documents: YEap 2', error);
+            });
+    });
+
     // Download document
     $(document).on('click', '.download-btn', function () {
         const docId = $(this).data('id');
         window.location.href = `${documentAPI}/${docId}/download`;
+        loadDocumentsIncoming();
+        loadDocumentsSender();
     });
 
     // Delete document
@@ -96,6 +133,8 @@ $(document).ready(function () {
                 if (response.ok) {
                     alert('Document deleted successfully.');
                     loadUserDocuments();  // Перезагружаем список документов для текущего пользователя
+                    loadDocumentsIncoming();
+                    loadDocumentsSender();
                 } else {
                     alert('Error deleting document.');
                 }

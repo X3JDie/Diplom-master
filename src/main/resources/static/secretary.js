@@ -38,7 +38,6 @@ function getUser() {
 
 // Функция для загрузки входящих документов
 function loadDocumentsIncoming(userEmail) {
-    console.log("Loading incoming documents for email:", userEmail); // Логирование email
     fetch(`/api/documents/incoming?email=${userEmail}`)
         .then(res => res.json())
         .then(documents => {
@@ -58,14 +57,13 @@ function loadDocumentsIncoming(userEmail) {
                         </td>
                     </tr>`;
             });
-            $('#document-incoming-list').html(documentRows);
+            $('#document-incoming-list').html(documentRows); // Обновляем таблицу
         })
-        .catch(error => console.error("Error loading incoming documents:", error)); // Логирование ошибки
+        .catch(error => console.error("Failed to load documents:", error));
 }
 
 // Функция для загрузки отправленных документов
 function loadDocumentsSender(userEmail) {
-    console.log("Loading sent documents for email:", userEmail); // Логирование email
     fetch(`/api/documents/sent?emailSender=${userEmail}`)
         .then(res => res.json())
         .then(documents => {
@@ -85,9 +83,9 @@ function loadDocumentsSender(userEmail) {
                         </td>
                     </tr>`;
             });
-            $('#document-sent-list').html(documentRows);
+            $('#document-sent-list').html(documentRows); // Обновляем таблицу
         })
-        .catch(error => console.error("Error loading sent documents:", error)); // Логирование ошибки
+        .catch(error => console.error("Failed to load documents:", error));
 }
 
 // Функция для загрузки списка пользователей
@@ -108,10 +106,51 @@ function loadUsers() {
         .catch(error => console.error("Failed to load users:", error)); // Логирование ошибки
 }
 
+$('#upload-form').on('submit', function (event) {
+    event.preventDefault();
+
+    const formData = new FormData();
+    const files = $('#files')[0].files;  // Получаем все выбранные файлы
+
+    // Добавляем каждый файл в FormData
+    for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);  // 'files' будет массивом на сервере
+    }
+
+    formData.append('title', $('#title').val());  // Заголовок
+    formData.append('email', $('#email').val());  // Почта (поле из формы)
+
+    // Получаем email текущего пользователя и добавляем в FormData
+    const userEmail = document.querySelector('#navbar-user span.fw-bolder').textContent; // Пытаемся получить email текущего пользователя из header
+    formData.append('emailSend', userEmail);  // Используем email текущего пользователя для отправки документа
+
+
+    // Отправка формы через fetch
+    fetch(documentAPI + '/upload', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => {
+            if (response.ok) {
+                alert('Documents uploaded successfully.');
+                const userEmail = document.querySelector('#navbar-user span.fw-bolder').textContent; // Получаем email текущего пользователя
+                loadDocumentsIncoming(userEmail);
+                loadDocumentsSender(userEmail);
+            } else {
+                alert('Error uploading documents.');
+            }
+        })
+        .catch(error => {
+            console.error('Error uploading documents:', error);
+        });
+});
+
+
 // Download document
 $(document).on('click', '.download-btn', function () {
     const docId = $(this).data('id');
     window.location.href = `${documentAPI}/${docId}/download`;
+
 });
 
 // Delete document
@@ -123,7 +162,9 @@ $(document).on('click', '.delete-btn', function () {
         .then(response => {
             if (response.ok) {
                 alert('Document deleted successfully.');
-                loadUserDocuments();  // Перезагружаем список документов для текущего пользователя
+                const userEmail = document.querySelector('#navbar-user span.fw-bolder').textContent; // Получаем email текущего пользователя
+                loadDocumentsIncoming(userEmail);
+                loadDocumentsSender(userEmail);
             } else {
                 alert('Error deleting document.');
             }
