@@ -121,7 +121,7 @@ function getUser() {
                         </td>
                     </tr>`;
                     });
-                    $('#document-incoming-1').html(documentRows);
+                    $('#document-incoming-list').html(documentRows);
                 })
                 .catch(error => console.error("Failed to load documents:", error));
         }
@@ -149,7 +149,7 @@ function getUser() {
                         </td>
                     </tr>`;
                     });
-                    $('#document-sent-1').html(documentRows);
+                    $('#document-sent-list').html(documentRows);
                 })
                 .catch(error => console.error("Failed to load documents:", error));
         }
