@@ -111,6 +111,9 @@ function getUser() {
                     <tr>
                         <td>${doc.id}</td>
                         <td>${doc.title}</td>
+                        <td>${doc.email}</td>
+                        <td>${doc.emailSender}</td>
+                        <td>${new Date(doc.uploadDate).toLocaleString()}</td>
                         <td>${doc.status}</td>
                         <td>
                             <button class="btn btn-sm btn-primary download-btn" data-id="${doc.id}">Download</button>
@@ -134,8 +137,11 @@ function getUser() {
                     documents.forEach(doc => {
                         documentRows += `
                     <tr>
-                        <td>${doc.id}</td>
+                       <td>${doc.id}</td>
                         <td>${doc.title}</td>
+                        <td>${doc.email}</td>
+                        <td>${doc.emailSender}</td>
+                        <td>${new Date(doc.uploadDate).toLocaleString()}</td>
                         <td>${doc.status}</td>
                         <td>
                             <button class="btn btn-sm btn-primary download-btn" data-id="${doc.id}">Download</button>
