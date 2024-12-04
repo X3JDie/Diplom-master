@@ -54,10 +54,11 @@ function loadDocumentsIncoming(userEmail) {
                         <td>
                             <button class="btn btn-sm btn-primary download-btn" data-id="${doc.id}">Download</button>
                             <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Delete</button>
+                            <button class="btn btn-sm btn-warning forward-btn" data-id="${doc.id}">Forward</button>
                         </td>
                     </tr>`;
             });
-            $('#document-incoming-list').html(documentRows); // Обновляем таблицу
+            $('#document-incoming-list').html(documentRows); // Обновляем таблицу входящих документов
         })
         .catch(error => console.error("Failed to load documents:", error));
 }
@@ -80,14 +81,63 @@ function loadDocumentsSender(userEmail) {
                         <td>
                             <button class="btn btn-sm btn-primary download-btn" data-id="${doc.id}">Download</button>
                             <button class="btn btn-sm btn-danger delete-btn" data-id="${doc.id}">Delete</button>
+                            <button class="btn btn-sm btn-warning forward-btn" data-id="${doc.id}">Forward</button>
                         </td>
                     </tr>`;
             });
-            $('#document-sent-list').html(documentRows); // Обновляем таблицу
+            $('#document-sent-list').html(documentRows); // Обновляем таблицу отправленных документов
         })
         .catch(error => console.error("Failed to load documents:", error));
 }
 
+document.getElementById('forward-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const documentId = document.getElementById('document-to-forward').value;
+    const recipientEmail = document.getElementById('forward-email').value;
+
+    // Получаем email текущего пользователя
+    const emailSender = document.querySelector('#navbar-user span.fw-bolder').textContent;
+
+    // Создаем объект для отправки
+    const forwardData = {
+        documentId: documentId,
+        emailSender: emailSender,
+        recipientEmail: recipientEmail
+    };
+
+    // Отправляем запрос на сервер
+    fetch('/api/documents/forward', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(forwardData)
+    })
+        .then(response => {
+            if (response.ok) {
+                alert('Document forwarded successfully.');
+                $('#forward-modal').modal('hide'); // Закрываем модальное окно
+                document.getElementById('forward-email').value = ''; // Очищаем поле ввода
+
+                // Перезагружаем страницу
+                location.reload(); // Обновляем страницу, чтобы отобразились изменения
+            } else {
+                alert('Error forwarding document.');
+            }
+        })
+        .catch(error => console.error('Error forwarding document:', error));
+});
+
+
+$(document).on('click', '.forward-btn', function () {
+    const docId = $(this).data('id');
+
+    // Открытие модального окна для ввода email получателя
+    $('#forward-modal').modal('show');
+    $('#document-to-forward').val(docId); // Устанавливаем ID документа в скрытое поле
+
+});
 // Функция для загрузки списка пользователей
 function loadUsers() {
     const userListAPI = 'http://localhost:8080/api/user/all';
@@ -134,8 +184,7 @@ $('#upload-form').on('submit', function (event) {
             if (response.ok) {
                 alert('Documents uploaded successfully.');
                 const userEmail = document.querySelector('#navbar-user span.fw-bolder').textContent; // Получаем email текущего пользователя
-                loadDocumentsIncoming(userEmail);
-                loadDocumentsSender(userEmail);
+
             } else {
                 alert('Error uploading documents.');
             }

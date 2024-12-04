@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -121,15 +122,6 @@ public class DocumentController {
         }
     }
 
-//    @GetMapping("/mail")
-//    public ResponseEntity<List<Document>> getDocumentsByEmail(@RequestParam String email) {
-//        List<Document> documents = documentService.getDocumentsByEmail(email);
-//        if (documents.isEmpty()) {
-//            return ResponseEntity.noContent().build();  // Если документы не найдены, возвращаем 204
-//        }
-//        return ResponseEntity.ok(documents);  // Возвращаем документы с кодом 200
-//    }
-
     @GetMapping("/mail")
     public ResponseEntity<List<Document>> getDocumentsByEmail(@RequestParam String email, String emailSender) {
         System.out.println("Looking for documents for email: " + email);  // Выводим email для отладки
@@ -161,6 +153,16 @@ public class DocumentController {
             return ResponseEntity.noContent().build();  // Если документы не найдены, возвращаем 204
         }
         return ResponseEntity.ok(documents);  // Возвращаем документы с кодом 200
+    }
+
+    @PostMapping("/forward")
+    public ResponseEntity<String> forwardDocument(@RequestBody Map<String, Object> request) {
+        Long documentId = Long.valueOf(request.get("documentId").toString());
+        String recipientEmail = request.get("recipientEmail").toString();
+
+        documentService.forwardDocument(documentId, recipientEmail);
+
+        return ResponseEntity.ok("Document forwarded successfully.");
     }
 
 }

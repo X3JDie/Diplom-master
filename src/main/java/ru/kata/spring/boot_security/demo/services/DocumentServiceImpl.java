@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.Date;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
@@ -65,17 +66,6 @@ public class DocumentServiceImpl implements DocumentService {
         }
     }
 
-//    @Override
-//    public List<Document> getDocumentsByEmail(String email) {
-//        return documentRepository.findByEmail(email);
-//    }
-
-//    @Override
-//    public List<Document> getDocumentsByEmail(String email, String emailSender) {
-//
-//        return documentRepository.findByEmailSenderOrEmailSender(email, emailSender);
-//    }
-
     @Override
     public List<Document> getDocumentsByEmail(String email, String emailSender) {
         // Фильтрация документов по email (получатель) и/или emailSender (отправитель)
@@ -85,21 +75,18 @@ public class DocumentServiceImpl implements DocumentService {
         return documentRepository.findByEmail(email);
     }
 
-    @Override
-    public List<Document> findByEmailSender(String emailSender) {
-        return documentRepository.findByEmailSender(emailSender);
+    public void forwardDocument(Long documentId, String recipientEmail) {
+        // Найти существующий документ
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found with ID: " + documentId));
+
+        // Обновить почту получателя и статус
+        document.setEmail(recipientEmail);
+        document.setStatus("Forwarded");
+        document.setUploadDate(new Date());
+
+        // Сохранить обновленный документ
+        documentRepository.save(document);
     }
-
-
-    @Override
-    public List<Document> getDocumentsByEmailRecipient(String email) {
-        return documentRepository.findByEmail(email);
-    }
-
-    @Override
-    public List<Document> getDocumentsByEmailSender(String emailSender) {
-        return documentRepository.findByEmailSender(emailSender);
-    }
-
 
 }
