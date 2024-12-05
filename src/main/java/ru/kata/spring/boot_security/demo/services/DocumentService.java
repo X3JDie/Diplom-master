@@ -17,4 +17,8 @@ public interface DocumentService {
      List<Document> getDocumentsByEmail(String email, String emailSend);
 
     void forwardDocument(Long documentId, String recipientEmail);
+
+    List<Document> getDocumentsByEmailAndSearch(String email, String search);
+
+    List<Document> getDocumentsBySenderEmailAndSearch(String emailSender, String search);
 }

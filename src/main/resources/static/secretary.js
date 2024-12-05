@@ -39,8 +39,11 @@ function getUser() {
 }
 
 // Функция для загрузки входящих документов
-function loadDocumentsIncoming(userEmail ) {
-    fetch(`/api/documents/incoming?email=${userEmail}`)
+function loadDocumentsIncoming(userEmail, searchQuery = '') {
+    const searchParam = searchQuery ? `&search=${searchQuery}` : ''; // Добавляем параметр поиска в запрос
+    console.log('Loading incoming documents with query:', searchQuery); // Логируем запрос
+
+    fetch(`/api/documents/incoming?email=${userEmail}${searchParam}`)
         .then(res => res.json())
         .then(documents => {
             let documentRows = '';
@@ -65,9 +68,12 @@ function loadDocumentsIncoming(userEmail ) {
         .catch(error => console.error("Failed to load documents:", error));
 }
 
-// Функция для загрузки отправленных документов
-function loadDocumentsSender(userEmail) {
-    fetch(`/api/documents/sent?emailSender=${userEmail}`)
+// Функция для загрузки отправленных документов с фильтрацией
+function loadDocumentsSender(userEmail, searchQuery = '') {
+    const searchParam = searchQuery ? `&search=${searchQuery}` : ''; // Добавляем параметр поиска в запрос
+    console.log('Loading sent documents with query:', searchQuery); // Логируем запрос
+
+    fetch(`/api/documents/sent?emailSender=${userEmail}${searchParam}`)
         .then(res => res.json())
         .then(documents => {
             let documentRows = '';
@@ -91,6 +97,22 @@ function loadDocumentsSender(userEmail) {
         })
         .catch(error => console.error("Failed to load documents:", error));
 }
+
+
+// Обработчик ввода в поле поиска
+document.getElementById('document-search').addEventListener('input', function () {
+    const searchQuery = this.value; // Получаем строку поиска
+    console.log('Search query:', searchQuery); // Логируем введённый запрос
+
+    const userEmail = document.querySelector('#navbar-user span.fw-bolder').textContent; // Получаем email текущего пользователя
+    console.log('User email:', userEmail); // Логируем email пользователя
+
+    // Загружаем документы с фильтрацией
+    loadDocumentsIncoming(userEmail, searchQuery);
+    loadDocumentsSender(userEmail, searchQuery);
+});
+
+
 
 document.getElementById('forward-form').addEventListener('submit', function (event) {
     event.preventDefault();

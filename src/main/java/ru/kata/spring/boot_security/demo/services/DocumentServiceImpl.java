@@ -89,4 +89,23 @@ public class DocumentServiceImpl implements DocumentService {
         documentRepository.save(document);
     }
 
+    public List<Document> getDocumentsByEmailAndSearch(String email, String search) {
+        if (search == null || search.isEmpty()) {
+            return documentRepository.findByEmail(email);
+        } else {
+            return documentRepository.findByEmailAndTitleContainingIgnoreCase(email, search);
+        }
+    }
+
+    public List<Document> getDocumentsBySenderEmailAndSearch(String emailSender, String search) {
+        if (search == null || search.isEmpty()) {
+            return documentRepository.findByEmailSender(emailSender);
+        } else {
+            return documentRepository.findByEmailSenderAndTitleContainingIgnoreCase(emailSender, search);
+        }
+    }
+
+
+
+
 }

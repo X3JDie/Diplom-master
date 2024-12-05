@@ -133,9 +133,10 @@ public class DocumentController {
     }
 
     @GetMapping("/incoming")
-    public ResponseEntity<List<Document>> getDocumentsByEmail(@RequestParam String email) {
-        // Фильтрация по получателю (email)
-        List<Document> documents = documentService.getDocumentsByEmail(email, null);
+    public ResponseEntity<List<Document>> getDocumentsByIncomingEmail(@RequestParam String email,
+                                                              @RequestParam(required = false) String search) {
+        // Фильтрация по получателю (email) и поиску по названию
+        List<Document> documents = documentService.getDocumentsByEmailAndSearch(email, search);
 
         if (documents.isEmpty()) {
             return ResponseEntity.noContent().build();  // Если документы не найдены, возвращаем 204
@@ -143,17 +144,20 @@ public class DocumentController {
 
         return ResponseEntity.ok(documents);  // Возвращаем документы с кодом 200
     }
-
-
 
     @GetMapping("/sent")
-    public ResponseEntity<List<Document>> getDocumentsBySenderEmail(@RequestParam String emailSender) {
-        List<Document> documents = documentService.getDocumentsByEmail(null, emailSender); // Фильтрация по отправителю
+    public ResponseEntity<List<Document>> getDocumentsBySenderEmail(@RequestParam String emailSender,
+                                                                    @RequestParam(required = false) String search) {
+        // Фильтрация по отправителю и поиску по названию
+        List<Document> documents = documentService.getDocumentsBySenderEmailAndSearch(emailSender, search);
+
         if (documents.isEmpty()) {
             return ResponseEntity.noContent().build();  // Если документы не найдены, возвращаем 204
         }
+
         return ResponseEntity.ok(documents);  // Возвращаем документы с кодом 200
     }
+
 
     @PostMapping("/forward")
     public ResponseEntity<String> forwardDocument(@RequestBody Map<String, Object> request) {
