@@ -6,6 +6,8 @@ const emailInput = document.getElementById('email');
 const suggestionsList = document.getElementById('email-suggestions');
 const selectedEmailsContainer = document.getElementById('selected-emails');
 let selectedEmails = [];
+let currentPage = 0;
+const pageSize = 20;
 
 // Функция для получения данных пользователя
 function getUser() {
@@ -23,11 +25,11 @@ function getUser() {
                     <span> with roles: </span>
                     <span>${roles}</span>`;
             userInfo.innerHTML = `
-                        <th scope="row">${principal.id}</th>
+<!--                        <th scope="row">${principal.id}</th>-->
                         <td>${principal.name}</td>
                         <td>${principal.surname}</td>
                         <th>${principal.email}</th>
-                        <td><span>${roles}</span></td>`;
+<!--                        <td><span>${roles}</span></td>-->`;
 
             // После получения email вызываем функцию для загрузки документов
             loadDocumentsIncoming(principal.email); // Передаем email для загрузки документов
@@ -37,7 +39,7 @@ function getUser() {
 }
 
 // Функция для загрузки входящих документов
-function loadDocumentsIncoming(userEmail) {
+function loadDocumentsIncoming(userEmail ) {
     fetch(`/api/documents/incoming?email=${userEmail}`)
         .then(res => res.json())
         .then(documents => {
